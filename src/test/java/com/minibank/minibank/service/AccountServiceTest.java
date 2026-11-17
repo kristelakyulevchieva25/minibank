@@ -5,6 +5,7 @@ import com.minibank.minibank.dto.CreateAccountRequest;
 import com.minibank.minibank.entity.Account;
 import com.minibank.minibank.entity.AccountStatus;
 import com.minibank.minibank.entity.AccountType;
+import com.minibank.minibank.exception.AccountNotFoundException;
 import com.minibank.minibank.repository.AccountRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +17,7 @@ import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -59,4 +61,13 @@ public class AccountServiceTest {
         assertEquals("1234567890", response.accountNumber());
         assertEquals(AccountType.CHECKING, response.type());
     }
+
+    @Test
+    void getAccount_whenNotFound_throwsException() {
+        when(accountRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(AccountNotFoundException.class,
+                () -> accountService.getAccount(999L));
+    }
+
 }
