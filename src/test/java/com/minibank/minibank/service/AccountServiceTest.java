@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,5 +41,22 @@ public class AccountServiceTest {
         assertEquals(AccountType.SAVINGS, response.type());
         assertEquals(AccountStatus.ACTIVE, response.status());
         assertEquals(10, response.accountNumber().length());
+    }
+
+    @Test
+    void getAccount_whenExists_returnAccount() {
+        Account account = new Account();
+        account.setId(1L);
+        account.setAccountNumber("1234567890");
+        account.setBalance(BigDecimal.ZERO);
+        account.setType(AccountType.CHECKING);
+        account.setStatus(AccountStatus.ACTIVE);
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+
+        AccountResponse response = accountService.getAccount(1L);
+
+        assertEquals(1L, response.id());
+        assertEquals("1234567890", response.accountNumber());
+        assertEquals(AccountType.CHECKING, response.type());
     }
 }
