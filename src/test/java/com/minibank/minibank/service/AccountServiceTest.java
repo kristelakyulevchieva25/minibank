@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -68,6 +69,32 @@ public class AccountServiceTest {
 
         assertThrows(AccountNotFoundException.class,
                 () -> accountService.getAccount(999L));
+    }
+
+    @Test
+    void listAccounts_returnsAllAccounts() {
+        Account first = new Account();
+        first.setId(1L);
+        first.setAccountNumber("1111111111");
+        first.setBalance(BigDecimal.ZERO);
+        first.setType(AccountType.SAVINGS);
+        first.setStatus(AccountStatus.ACTIVE);
+
+        Account second = new Account();
+        second.setId(2L);
+        second.setAccountNumber("2222222222");
+        second.setBalance(BigDecimal.ZERO);
+        second.setType(AccountType.CHECKING);
+        second.setStatus(AccountStatus.ACTIVE);
+
+        when(accountRepository.findAll()).thenReturn(List.of(first, second));
+
+        List<AccountResponse> result = accountService.listAccounts();
+
+        assertEquals(2, result.size());
+        assertEquals("1111111111", result.get(0).accountNumber());
+        assertEquals("2222222222", result.get(1).accountNumber());
+
     }
 
 }
