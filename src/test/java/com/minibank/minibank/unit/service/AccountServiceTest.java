@@ -11,6 +11,8 @@ import com.minibank.minibank.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -21,14 +23,14 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import com.minibank.minibank.service.AccountService;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataAccessResourceFailureException;
 
 @ExtendWith(MockitoExtension.class)
 public class AccountServiceTest {
@@ -115,4 +117,60 @@ public class AccountServiceTest {
         assertEquals("2222222222", result.get(1).accountNumber());
     }
 
+    @Test
+    void createAccount_whenAccountNumberAlreadyExists_generatesAnotherNumber() {
+        // given
+        CreateAccountRequest request = new CreateAccountRequest(AccountType.CHECKING);
+        when(accountRepository.existsByAccountNumber(anyString())).thenReturn(true, false);
+        when(accountRepository.save(any(Account.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        // when
+        AccountResponse response = accountService.createAccount(request);
+
+        // then
+        verify(accountRepository, times(2)).existsByAccountNumber(anyString());
+        assertEquals(10, response.accountNumber().length());
+    }
+
+    @Test
+    void listAccounts_whenNoAccounts_returnsEmptyList() {
+        // given
+        when(accountRepository.findAll()).thenReturn(List.of());
+
+        // when
+        List<AccountResponse> result = accountService.listAccounts();
+
+        // then
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void createAccount_whenDatabaseFails_throwsException() {
+        // given
+        CreateAccountRequest request = new CreateAccountRequest(AccountType.SAVINGS);
+        when(accountRepository.existsByAccountNumber(anyString())).thenReturn(false);
+        when(accountRepository.save(any(Account.class)))
+                .thenThrow(new DataAccessResourceFailureException("Database is down"));
+
+        // when and then
+        assertThrows(DataAccessException.class, () -> accountService.createAccount(request));
+    }
+
+    @ParameterizedTest
+    @EnumSource(AccountType.class)
+    void createAccount_forEveryAccountType_createsActiveAccount(AccountType type) {
+        // given
+        CreateAccountRequest request = new CreateAccountRequest(type);
+        when(accountRepository.existsByAccountNumber(anyString())).thenReturn(false);
+        when(accountRepository.save(any(Account.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        // when
+        AccountResponse response = accountService.createAccount(request);
+
+        // then
+        assertEquals(type, response.type());
+        assertEquals(AccountStatus.ACTIVE, response.status());
+    }
 }
