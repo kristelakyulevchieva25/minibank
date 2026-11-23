@@ -1,4 +1,4 @@
-package com.minibank.minibank.service;
+package com.minibank.minibank.unit.service;
 
 import com.minibank.minibank.dto.AccountResponse;
 import com.minibank.minibank.dto.CreateAccountRequest;
@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import com.minibank.minibank.service.AccountService;
 
 @ExtendWith(MockitoExtension.class)
 public class AccountServiceTest {
