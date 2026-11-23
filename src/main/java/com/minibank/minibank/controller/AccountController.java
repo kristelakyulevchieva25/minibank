@@ -12,8 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
+/**
+ * REST endpoints for creating and reading bank accounts.
+ */
 @Slf4j
 @RestController
 @RequestMapping("/accounts")
@@ -22,6 +23,12 @@ public class AccountController {
 
     private final AccountService accountService;
 
+    /**
+     * Creates a new account.
+     *
+     * @param request the request containing the account type
+     * @return 201 with the created account, or 500 if something goes wrong
+     */
     @PostMapping
     public ResponseEntity<?> createAccount(@Valid @RequestBody CreateAccountRequest request) {
         log.info("Request to create account of type {}", request.type());
@@ -35,6 +42,12 @@ public class AccountController {
         }
     }
 
+    /**
+     * Returns an account by its id.
+     *
+     * @param id the id of the account
+     * @return 200 with the account, 404 if it does not exist, or 500 if something goes wrong
+     */
     @GetMapping("/{id}")
     public ResponseEntity<?> getAccount(@PathVariable Long id) {
         log.info("Request to get account with id {}", id);
@@ -50,6 +63,11 @@ public class AccountController {
         }
     }
 
+    /**
+     * Returns all accounts.
+     *
+     * @return 200 with the list of accounts, or 500 if something goes wrong
+     */
     @GetMapping
     public ResponseEntity<?> listAccounts() {
         log.info("Request to list all accounts");
