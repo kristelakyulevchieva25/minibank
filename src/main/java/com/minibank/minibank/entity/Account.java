@@ -5,8 +5,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+
 import java.math.BigDecimal;
 
+// Not @Value: @Value makes fields final and removes setters/no-args constructor, which JPA needs.
 @Entity
 @Table(name = "accounts")
 @Getter
