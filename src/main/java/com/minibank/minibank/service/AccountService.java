@@ -16,7 +16,8 @@ import java.util.concurrent.ThreadLocalRandom;
 @Service
 @RequiredArgsConstructor
 public class AccountService {
-
+    private static final long MIN_ACCOUNT_NUMBER = 1_000_000_000L;
+    private static final long MAX_ACCOUNT_NUMBER = 10_000_000_000L; // upper bound is exclusive
     private final AccountRepository accountRepository;
 
     public AccountResponse createAccount(CreateAccountRequest request) {
@@ -42,12 +43,12 @@ public class AccountService {
     }
 
     private String generateAccountNumber() {
-        String number;
+        String accountNumber;
         do {
-            number = String.valueOf(
-                    ThreadLocalRandom.current().nextLong(1_000_000_000L, 10_000_000_000L));
-        } while (accountRepository.existsByAccountNumber(number));
-        return number;
+            accountNumber = String.valueOf(
+                    ThreadLocalRandom.current().nextLong(MIN_ACCOUNT_NUMBER, MAX_ACCOUNT_NUMBER));
+        } while (accountRepository.existsByAccountNumber(accountNumber));
+        return accountNumber;
 
     }
 }
