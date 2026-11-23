@@ -7,12 +7,14 @@ import com.minibank.minibank.entity.AccountStatus;
 import com.minibank.minibank.exception.AccountNotFoundException;
 import com.minibank.minibank.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AccountService {
@@ -26,7 +28,9 @@ public class AccountService {
         account.setBalance(BigDecimal.ZERO);
         account.setType(request.type());
         account.setStatus(AccountStatus.ACTIVE);
-        return AccountResponse.from(accountRepository.save(account));
+        Account savedAccount = accountRepository.save(account);
+        log.info("Account {} created with type {}", savedAccount.getAccountNumber(), savedAccount.getType());
+        return AccountResponse.from(savedAccount);
     }
 
     public AccountResponse getAccount(Long id) {
