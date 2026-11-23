@@ -57,8 +57,7 @@ public class AccountServiceTest {
         // given
         CreateAccountRequest request = new CreateAccountRequest(AccountType.SAVINGS);
         when(accountRepository.existsByAccountNumber(anyString())).thenReturn(false);
-        when(accountRepository.save(any(Account.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // when
         AccountResponse response = accountService.createAccount(request);
@@ -95,8 +94,7 @@ public class AccountServiceTest {
         when(accountRepository.findById(999L)).thenReturn(Optional.empty());
 
         // when
-        AccountNotFoundException exception = assertThrows(AccountNotFoundException.class,
-                () -> accountService.getAccount(999L));
+        AccountNotFoundException exception = assertThrows(AccountNotFoundException.class, () -> accountService.getAccount(999L));
 
         // then
         assertEquals("Account with id 999 not found", exception.getMessage());
@@ -122,8 +120,7 @@ public class AccountServiceTest {
         // given
         CreateAccountRequest request = new CreateAccountRequest(AccountType.CHECKING);
         when(accountRepository.existsByAccountNumber(anyString())).thenReturn(true, false);
-        when(accountRepository.save(any(Account.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // when
         AccountResponse response = accountService.createAccount(request);
@@ -150,8 +147,7 @@ public class AccountServiceTest {
         // given
         CreateAccountRequest request = new CreateAccountRequest(AccountType.SAVINGS);
         when(accountRepository.existsByAccountNumber(anyString())).thenReturn(false);
-        when(accountRepository.save(any(Account.class)))
-                .thenThrow(new DataAccessResourceFailureException("Database is down"));
+        when(accountRepository.save(any(Account.class))).thenThrow(new DataAccessResourceFailureException("Database is down"));
 
         // when and then
         assertThrows(DataAccessException.class, () -> accountService.createAccount(request));
@@ -163,8 +159,7 @@ public class AccountServiceTest {
         // given
         CreateAccountRequest request = new CreateAccountRequest(type);
         when(accountRepository.existsByAccountNumber(anyString())).thenReturn(false);
-        when(accountRepository.save(any(Account.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // when
         AccountResponse response = accountService.createAccount(request);
@@ -172,5 +167,15 @@ public class AccountServiceTest {
         // then
         assertEquals(type, response.type());
         assertEquals(AccountStatus.ACTIVE, response.status());
+    }
+
+
+    @Test
+    void listAccounts_whenDatabaseFails_throwsException() {
+        // given
+        when(accountRepository.findAll()).thenThrow(new DataAccessResourceFailureException("Database is down"));
+
+        // when and then
+        assertThrows(DataAccessException.class, () -> accountService.listAccounts());
     }
 }
